@@ -16,68 +16,41 @@ public class TimeLine : MonoBehaviour
         rect = GetComponent<RectTransform>();
         for (int i = 0; i < 25; i++)
         {
-            GameObject obj = Instantiate(timePrefab , this.transform);
+            GameObject obj = Instantiate(timePrefab, this.transform);
             ThisTime time = obj.GetComponent<ThisTime>();
-            time.text.text = (i%24 + 1).ToString();
+            time.text.text = (i % 24 + 1).ToString();
             time.NowTime = (i % 24 + 1);
             timelines.Add(time);
         }
     }
 
-    public void StartMovingLeft(float x, RectTransform arrow)
+    public void MovetoLeft(float x)
     {
-        StartCoroutine(MovingLeft(x,arrow));
+        Vector3 p = rect.anchoredPosition;
+        p.x -= x;
+        while (p.x < -80)
+        {
+            p.x += 80;
+            ThisTime t = timelines[0];
+            int i = timelines[timelines.Count - 1].NowTime;
+            t.text.text = (i % 24 + 1).ToString();
+            t.NowTime = (i % 24 + 1);
+            timelines.RemoveAt(0);
+            timelines.Add(t);
+            t.transform.SetSiblingIndex(transform.childCount - 1);
+        }
+
+        rect.anchoredPosition = p;
     }
 
-
-    IEnumerator MovingLeft(float x , RectTransform arrow)
+    public float GetNextTimeRange()
     {
-        float range = 0;
-        Debug.Log(x);
-        while(range < x)
-        {
-            Vector3 p = rect.anchoredPosition;
-            Vector3 ArrowP = arrow.anchoredPosition;
-            ArrowP.x -= Time.deltaTime * Speed;
-            p.x -= Time.deltaTime * Speed;
-            range += Time.deltaTime * Speed;
-            if (p.x < -80)
-            {
-                p.x += 80;
-                ThisTime t = timelines[0];
-                int i = timelines[timelines.Count - 1].NowTime;
-                t.text.text = (i % 24 + 1).ToString();
-                t.NowTime = (i % 24 + 1);
-                timelines.RemoveAt(0);
-                timelines.Add(t);
-                t.transform.SetSiblingIndex(transform.childCount - 1);
-            }
-            arrow.anchoredPosition = ArrowP;
-            rect.anchoredPosition = p;
-            yield return null;
-        }
+        float randTime = Random.Range(20f, 25f);
+        float range = (randTime - timelines[0].NowTime) * 80;
+        return range;
 
-        {
-            Vector3 p = rect.anchoredPosition;
-            Vector3 ArrowP = arrow.anchoredPosition;
-            ArrowP.x -= x - range;
-            p.x -= x - range;
 
-            if (p.x < -80)
-            {
-                p.x += 80;
-                ThisTime t = timelines[0];
-                int i = timelines[timelines.Count - 1].NowTime;
-                t.text.text = (i % 24 + 1).ToString();
-                t.NowTime = (i % 24 + 1);
-                timelines.RemoveAt(0);
-                timelines.Add(t);
-                t.transform.SetSiblingIndex(transform.childCount - 1);
-            }
-            arrow.anchoredPosition = ArrowP;
-            rect.anchoredPosition = p;
-        }
-
-        sleepControl.Reset();
     }
 }
+
+
